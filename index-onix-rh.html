@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RETIRO ÓNIX RH® · Ciudad de México · 23 al 26 de julio</title>
+    <title>RETIRO ÓNIX RH · Ciudad de México · 23 al 26 de julio</title>
     <meta name="description" content="Una experiencia privada de 4 días / 3 noches para solo 10 empresarios. Ciudad de México · Edición Privada · 23 al 26 de julio · Inversión 8.800 €.">
-    <meta property="og:title" content="RETIRO ÓNIX RH®">
+    <meta property="og:title" content="RETIRO ÓNIX RH">
     <meta property="og:description" content="Una experiencia privada para empresarios y millonarios que sostienen el éxito y necesitan reorganizarse por dentro. Solo 10 plazas · Ciudad de México · 23 al 26 de julio.">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
@@ -21,9 +21,68 @@
     <script>
         const localImageExtensions = ['webp', 'avif', 'png', 'jpg', 'jpeg', 'jfif', 'gif', 'svg', 'bmp'];
 
+        function resolveLocalImage(element, base, attribute = 'src') {
+            let attempt = 0;
+
+            const tryNextExtension = () => {
+                if (attempt >= localImageExtensions.length) return;
+
+                const candidate = `${base}.${localImageExtensions[attempt++]}`;
+                const probe = new Image();
+
+                probe.onload = () => {
+                    element.setAttribute(attribute, candidate);
+                    if (element instanceof HTMLImageElement) {
+                        element.style.visibility = '';
+                    }
+                };
+                probe.onerror = tryNextExtension;
+                probe.src = candidate;
+            };
+
+            tryNextExtension();
+        }
+
+        function resolveLocalBackground(element, base) {
+            let attempt = 0;
+
+            const tryNextExtension = () => {
+                if (attempt >= localImageExtensions.length) return;
+
+                const candidate = `${base}.${localImageExtensions[attempt++]}`;
+                const probe = new Image();
+
+                probe.onload = () => {
+                    element.style.setProperty('--section-background-image', `url("${candidate}")`);
+                };
+                probe.onerror = tryNextExtension;
+                probe.src = candidate;
+            };
+
+            tryNextExtension();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('img[data-image-base]').forEach(image => {
+                resolveLocalImage(image, image.dataset.imageBase);
+            });
+
+            document.querySelectorAll('source[data-image-base]').forEach(source => {
+                resolveLocalImage(source, source.dataset.imageBase, 'srcset');
+            });
+
+            document.querySelectorAll('[data-background-image-base]').forEach(element => {
+                resolveLocalBackground(element, element.dataset.backgroundImageBase);
+            });
+        });
+
         document.addEventListener('error', event => {
             const image = event.target;
-            if (!(image instanceof HTMLImageElement) || !image.dataset.imageBase) return;
+            if (!(image instanceof HTMLImageElement)) return;
+            if (!image.dataset.imageBase) {
+                image.style.visibility = 'hidden';
+                return;
+            }
 
             const nextAttempt = Number(image.dataset.imageAttempt || 0) + 1;
             if (nextAttempt < localImageExtensions.length) {
@@ -34,7 +93,11 @@
 
             const fallback = image.dataset.imageFallback;
             image.removeAttribute('data-image-base');
-            if (fallback) image.src = fallback;
+            if (fallback) {
+                image.src = fallback;
+            } else {
+                image.style.visibility = 'hidden';
+            }
         }, true);
     </script>
 
@@ -113,9 +176,9 @@
         }
 
         .navbar.has-dark-background {
-            background-color: rgba(13, 11, 9, 0.92);
-            border-bottom-color: rgba(168, 135, 74, 0.3);
-            mix-blend-mode: normal;
+            background-color: transparent;
+            border-bottom-color: transparent;
+            mix-blend-mode: difference;
         }
 
         .navbar-logo {
@@ -2513,13 +2576,19 @@
 
         /* Reserva — atmospheric dark with deep blue top, warm gold bottom */
         #reserva {
-            background: linear-gradient(
-                170deg,
-                #0B0D14 0%,
-                #0E0C0A 35%,
-                #120F0C 65%,
-                #0D0B09 100%
-            ) !important;
+            background-image:
+                linear-gradient(
+                    180deg,
+                    rgba(13, 11, 9, 1) 0%,
+                    rgba(13, 11, 9, 0.96) 12%,
+                    rgba(14, 12, 10, 0.88) 38%,
+                    rgba(18, 15, 12, 0.84) 70%,
+                    rgba(13, 11, 9, 0.92) 100%
+                ),
+                var(--section-background-image, none) !important;
+            background-color: #0D0B09;
+            background-size: cover;
+            background-position: center;
         }
 
         /* Gallery header text */
@@ -2711,12 +2780,12 @@
 
     <!-- PAGE LOADER -->
     <div class="page-loader" id="pageLoader">
-        <div class="page-loader-text" id="loaderText">ÓNIX <em>RH®</em></div>
+        <div class="page-loader-text" id="loaderText">ÓNIX <em>RH</em></div>
     </div>
 
     <!-- NAVBAR -->
     <nav class="navbar" id="navbar">
-        <a href="#" class="navbar-logo">ÓNIX RH®</a>
+        <a href="#" class="navbar-logo">ÓNIX RH</a>
         <div class="navbar-hamburger" id="hamburger" aria-label="Menú de navegación">
             <span></span>
             <span></span>
@@ -2745,14 +2814,14 @@
     <section class="hero section" id="hero">
         <div class="hero-image-wrapper" id="heroImageWrapper">
             <picture>
-                <source media="(max-width: 900px)" srcset="assets/images/hero/hero-movil.webp">
-                <img src="assets/images/hero/hero-escritorio.webp" alt="Mujer contemplando el paisaje desde una hacienda privada" loading="eager">
+                <source media="(max-width: 900px)" srcset="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-image-base="assets/images/hero/hero-movil">
+                <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-image-base="assets/images/hero/hero-escritorio" alt="Mujer contemplando el paisaje desde una hacienda privada" loading="eager">
             </picture>
         </div>
         <div class="hero-overlay"></div>
         <div class="hero-content">
             <p class="hero-tagline" id="heroTagline">CIUDAD DE MÉXICO · EDICIÓN PRIVADA</p>
-            <h1 class="hero-title" id="heroTitle">ÓNIX <em>RH®</em></h1>
+            <h1 class="hero-title" id="heroTitle">ÓNIX <em>RH</em></h1>
             <p class="hero-subtitle" id="heroSubtitle">23 AL 26 DE JULIO · 4 DÍAS / 3 NOCHES · SOLO 10 PLAZAS · INVERSIÓN 8.800 €</p>
         </div>
         <div class="scroll-indicator" id="scrollIndicator">
@@ -2771,8 +2840,8 @@
         <div class="container">
             <div class="bienvenida-inner">
                 <h2 class="reveal">Has construido una vida de éxito. <em>Pero sostenerlo todo empieza a tener un coste interno demasiado alto.</em></h2>
-                <p class="reveal">Hay empresarios que lideran, deciden, construyen y sostienen demasiado. Admirados por fuera, pero pocas veces escuchados por dentro. Retiro Ónix RH® nace para ese empresario. El que ha conseguido mucho. El que puede con todo. Y el que necesita reorganizarse por dentro para seguir liderando desde una nueva estructura.</p>
-                <a href="#metodo" class="text-link reveal">DESCUBRE ÓNIX RH®</a>
+                <p class="reveal">Hay empresarios que lideran, deciden, construyen y sostienen demasiado. Admirados por fuera, pero pocas veces escuchados por dentro. Retiro Ónix RH nace para ese empresario. El que ha conseguido mucho. El que puede con todo. Y el que necesita reorganizarse por dentro para seguir liderando desde una nueva estructura.</p>
+                <a href="#metodo" class="text-link reveal">DESCUBRE ÓNIX RH</a>
             </div>
         </div>
     </section>
@@ -2801,16 +2870,16 @@
 
             <article class="retreat-block">
                 <div class="retreat-copy">
-                    <h3>Ónix RH®</h3>
+                    <h3>Ónix RH</h3>
                     <p>Una experiencia privada para empresarios, directivos y personas de alto patrimonio que desean observar sus patrones, reorganizar su identidad operativa y recuperar claridad. No es un retiro wellness convencional. No es una escapada de descanso. Es una inmersión de alta precisión para tomar decisiones desde una nueva estructura interna.</p>
-                    <a href="#reserva">DESCUBRE ÓNIX RH®</a>
+                    <a href="#reserva">DESCUBRE ÓNIX RH</a>
                 </div>
                 <div class="retreat-images">
                     <div class="retreat-image-main">
                         <img src="assets/images/metodo/mujer-detras-principal.webp" data-image-base="assets/images/metodo/mujer-detras-principal" data-image-fallback="https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1500&q=82&auto=format&fit=crop" alt="Entorno privado de lujo RH Elite" loading="lazy">
                     </div>
                     <div class="retreat-image-secondary">
-                        <img src="assets/images/metodo/mujer-detras-secundaria.webp" data-image-base="assets/images/metodo/mujer-detras-secundaria" data-image-fallback="https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=900&q=82&auto=format&fit=crop" alt="Interior del espacio Ónix RH®" loading="lazy">
+                        <img src="assets/images/metodo/mujer-detras-secundaria.webp" data-image-base="assets/images/metodo/mujer-detras-secundaria" data-image-fallback="https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=900&q=82&auto=format&fit=crop" alt="Interior del espacio Ónix RH" loading="lazy">
                     </div>
                 </div>
             </article>
@@ -2818,7 +2887,7 @@
             <article class="retreat-block">
                 <div class="retreat-copy">
                     <h3>El cuerpo registra lo que el éxito calla</h3>
-                    <p>Cansancio sostenido. Tensión constante. Decisiones desde la urgencia. Insomnio. Desconexión. El cuerpo de un empresario que ha dado mucho también guarda señales que no se verbalizan en ninguna reunión. Ónix RH® te invita a leer esas señales desde un espacio privado, preciso y profundo. No para exigirte más. Para volver a funcionar desde tu mejor versión.</p>
+                    <p>Cansancio sostenido. Tensión constante. Decisiones desde la urgencia. Insomnio. Desconexión. El cuerpo de un empresario que ha dado mucho también guarda señales que no se verbalizan en ninguna reunión. Ónix RH te invita a leer esas señales desde un espacio privado, preciso y profundo. No para exigirte más. Para volver a funcionar desde tu mejor versión.</p>
                     <a href="#reserva">EXPLORA LA EXPERIENCIA</a>
                 </div>
                 <div class="retreat-images">
@@ -2834,7 +2903,7 @@
             <article class="retreat-block">
                 <div class="retreat-copy">
                     <h3>Una vida que también te sostenga a ti</h3>
-                    <p>Has sostenido empresas, equipos, decisiones, familias y expectativas de alto nivel. Has aprendido a resolver. A dirigir. A construir. Pero una vida construida desde la exigencia también necesita dirección interior, claridad y verdad. Ónix RH® no viene a cambiar quién eres. Viene a devolverte la capacidad de seguir siendo tú mientras sigues construyendo.</p>
+                    <p>Has sostenido empresas, equipos, decisiones, familias y expectativas de alto nivel. Has aprendido a resolver. A dirigir. A construir. Pero una vida construida desde la exigencia también necesita dirección interior, claridad y verdad. Ónix RH no viene a cambiar quién eres. Viene a devolverte la capacidad de seguir siendo tú mientras sigues construyendo.</p>
                     <a href="#reserva">CONOCE EL PROGRAMA</a>
                 </div>
                 <div class="retreat-images">
@@ -2935,7 +3004,7 @@
                 </div>
                 <div class="dia-right">
                     <ul>
-                        <li>El corazón de Ónix RH®.</li>
+                        <li>El corazón de Ónix RH.</li>
                         <li>Cada participante formula una decisión concreta — no un deseo, una decisión real — y la vincula a su mineral, su concha y su flor.</li>
                         <li>Mineral: estabilidad y compromiso. Concha: escucha y regreso a la propia voz. Flor: apertura y nueva dirección.</li>
                         <li>Intención: transformar una intención en una decisión visible, emocional y física.</li>
@@ -2972,7 +3041,7 @@
         </div>
         <div class="chef-overlay"></div>
         <div class="chef-content reveal">
-            <p class="chef-label">REBECA HIDALGO · ARQUITECTURA FUNCIONAL RH®</p>
+            <p class="chef-label">REBECA HIDALGO · ARQUITECTURA FUNCIONAL RH</p>
             <h2><em>Sostener el éxito</em> también<br>requiere método</h2>
             <p>Identidad. Patrón. Decisión. Estructura.<br>Una experiencia creada para reorganizarte desde dentro.</p>
         </div>
@@ -3046,20 +3115,20 @@
     <!-- ============================
          9. RESERVA
     ============================ -->
-    <section class="reserva" id="reserva">
+    <section class="reserva" id="reserva" data-background-image-base="assets/images/reserva/fondo">
         <div class="reserva-inner">
             <div class="reserva-heading reveal">
                 <p class="reserva-eyebrow">Acceso Privado</p>
                 <h2>
                     <span class="reserva-heading-line">Tu plaza en <em>Ónix</em></span>
-                    <span class="reserva-heading-line"><em>RH®</em></span>
+                    <span class="reserva-heading-line"><em>RH</em></span>
                 </h2>
                 <p class="reserva-intro">Una experiencia privada para empresarios y personas de alto patrimonio que han construido una vida de éxito y desean sostenerla desde una nueva estructura interna.</p>
             </div>
 
             <div class="reserva-layout">
                 <div class="reserva-summary reveal">
-                    <h3 class="reserva-retreat-name">Retiro Ónix RH®</h3>
+                    <h3 class="reserva-retreat-name">Retiro Ónix RH</h3>
                     <ul class="reserva-details">
                         <li>
                             <svg class="reserva-detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
@@ -3097,7 +3166,7 @@
                     </div>
 
                     <p class="reserva-payment-copy">La reserva inicial confirma tu acceso. El segundo pago se completará posteriormente mediante enlace privado.</p>
-                    <a class="reserva-cta" href="#" data-stripe-payment-link aria-label="Solicitar plaza privada mediante Stripe">Solicitar acceso privado</a>
+                    <a class="reserva-cta" href="https://wa.me/34663366020?text=Hola%2C%20me%20gustar%C3%ADa%20reservar%20mi%20plaza%20en%20el%20Retiro%20%C3%93nix%20RH%20de%20julio." target="_blank" rel="noopener noreferrer" aria-label="Solicitar plaza privada mediante Stripe">Solicitar acceso privado</a>
                     <p class="reserva-secure">Acceso limitado a 10 participantes por privacidad, acompañamiento individual y calidad de experiencia.</p>
                 </div>
             </div>
@@ -3111,8 +3180,8 @@
     ============================ -->
     <footer class="section section-dark footer" id="footer">
         <div class="footer-top reveal">
-            <div class="footer-logo">ÓNIX <em>RH®</em></div>
-            <p class="footer-tagline">UNA EXPERIENCIA PRIVADA CREADA POR REBECA HIDALGO · RETIRO ÓNIX RH® · ARQUITECTURA FUNCIONAL RH®</p>
+            <div class="footer-logo">ÓNIX <em>RH</em></div>
+            <p class="footer-tagline">UNA EXPERIENCIA PRIVADA CREADA POR REBECA HIDALGO · RETIRO ÓNIX RH · ARQUITECTURA FUNCIONAL RH</p>
         </div>
 
         <div class="footer-grid reveal">
@@ -3136,7 +3205,7 @@
         </div>
 
         <div class="footer-bottom">
-            <p>No necesitas construir más. Necesitas aprender a sostener de otra manera aquello que ya has construido. · © 2025 Arquitectura Funcional RH®</p>
+            <p>No necesitas construir más. Necesitas aprender a sostener de otra manera aquello que ya has construido. · © 2025 Arquitectura Funcional RH</p>
         </div>
     </footer>
 
@@ -3185,7 +3254,7 @@
                 const personalizedServices = [
                     {
                         number: '01',
-                        title: 'Método Ónix RH®',
+                        title: 'Método Ónix RH',
                         description: 'Un proceso de alta precisión para observar patrones, reorganizar la identidad operativa y tomar decisiones desde una nueva estructura interna.',
                         imageBase: 'assets/images/servicios/metodo-onix',
                         image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=960&q=80&auto=format&fit=crop'
@@ -3265,7 +3334,7 @@
                         image: 'https://images.unsplash.com/photo-1552252059-8b1cd9019f5e?w=1100&q=80&auto=format&fit=crop'
                     },
                     {
-                        title: 'Ritual Ónix RH®',
+                        title: 'Ritual Ónix RH',
                         imageBase: 'assets/images/cuatro-dias/ritual-onix-woman',
                         image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1100&q=80&auto=format&fit=crop'
                     },
